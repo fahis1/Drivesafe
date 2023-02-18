@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'model/user_model.dart';
+import 'package:location/location.dart';
 
-const LatLng CurrentLocation = LatLng(10.011603008889157, 76.29320845015968);
+const LatLng CurrentLocation = LatLng(10.211603008889157, 76.19320845015968);
 
 // class update_cameras {
 //   Future update(String email, String password) async {
@@ -33,10 +34,14 @@ class HomePage extends StatefulWidget {
 class _MyHomePageState extends State<HomePage> {
   late GoogleMapController mapController;
   Map<String, Marker> _markers = {};
-  void _incrementCounter() {
+  void _incrementCounter() async {
     setState(() {
       addmarker('test', CurrentLocation);
     });
+    Location usrlocation = Location();
+    LocationData currentLocation = await usrlocation.getLocation();
+    LatLng usercoordinate =
+        LatLng(currentLocation.latitude!, currentLocation.longitude!);
   }
 
   @override
@@ -54,6 +59,8 @@ class _MyHomePageState extends State<HomePage> {
           mapController = controller;
         },
         markers: _markers.values.toSet(),
+        zoomControlsEnabled: false,
+        myLocationEnabled: true,
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: _incrementCounter,

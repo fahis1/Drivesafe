@@ -32,6 +32,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<HomePage> {
+  String mapTheme = '';
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    mapTheme;
+    DefaultAssetBundle.of(context)
+        .loadString('assets/mapstyles/dark.json')
+        .then((value) {
+      mapTheme = value;
+    });
+  }
+
   late GoogleMapController mapController;
   Map<String, Marker> _markers = {};
   void _incrementCounter() async {
@@ -57,6 +70,7 @@ class _MyHomePageState extends State<HomePage> {
         ),
         onMapCreated: (controller) {
           mapController = controller;
+          controller.setMapStyle(mapTheme);
         },
         markers: _markers.values.toSet(),
         zoomControlsEnabled: false,

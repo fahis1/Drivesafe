@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "368127278359",
+    "project_id": "roadcam-abe6e",
+    "storage_bucket": "roadcam-abe6e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:368127278359:android:91b4c27ffa9cf0ae168b52",
+        "android_client_info": {
+          "package_name": "com.example.drivesafe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "368127278359-6udev56nbmpoq52b9edlntl41lc8vv75.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUatVIyQQEZC2ZLICTTi6KPpFGRlfohco"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "368127278359-6udev56nbmpoq52b9edlntl41lc8vv75.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

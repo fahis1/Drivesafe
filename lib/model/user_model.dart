@@ -1,30 +1,30 @@
 import 'package:json_annotation/json_annotation.dart';
 
 @JsonSerializable()
-class cameras {
+class Cameras {
   String? camera_type;
   String? place;
-  double? Latitude;
-  double? Longitude;
+  double? latitude;
+  double? longitude;
   double? speedlimit;
 
-  cameras({
-    this.Latitude,
-    this.Longitude,
+  Cameras({
+    this.latitude,
+    this.longitude,
     this.place,
   });
-  factory cameras.fromJson(Map<String, dynamic> parsedJson) {
-    return cameras(
+  factory Cameras.fromJson(Map<String, dynamic> parsedJson) {
+    return Cameras(
       place: parsedJson['location'].toString(),
-      Latitude: double.parse(parsedJson['Latitude'].toString()),
-      Longitude: double.parse(parsedJson['Longitude'].toString()),
+      latitude: double.tryParse(parsedJson['latitude'].toString()),
+      longitude: double.tryParse(parsedJson['longitude'].toString()),
       // profilepic: parsedJson['profilepic'].toString()
     );
   }
   Map<String, dynamic> toJson() => {
         "place": place,
-        "Longitude": Longitude,
-        "Latitude": Latitude,
+        "longitude": longitude,
+        "latitude": latitude,
         // "profilepic": profilepic,
       };
 }

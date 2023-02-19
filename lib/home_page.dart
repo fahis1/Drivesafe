@@ -1,28 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:logger/logger.dart';
 import 'model/user_model.dart';
 import 'package:location/location.dart';
-
-const LatLng CurrentLocation = LatLng(10.211603008889157, 76.19320845015968);
-
-// class update_cameras {
-//   Future update(String email, String password) async {
-//     CollectionReference _collectionRef =
-//         FirebaseFirestore.instance.collection('collection');
-//     QuerySnapshot querySnapshot = await _collectionRef.get();
-
-//     // Get data from docs and convert map to List
-//     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
-//     print(allData);
-//     // DocumentSnapshot userData =
-//     // await FirebaseFirestore.instance.collection("cameras").doc().get();
-//     // cameras loginUser =
-//     // cameras.fromJson(userData.data() as Map<String, dynamic>);
-//     // SharedPreferences prefs = await SharedPreferences.getInstance();
-//     // prefs.setString("email", loginUser.email.toString());
-//   }
-// }
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -32,11 +13,28 @@ class HomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<HomePage> {
+  final logger =
+      Logger(printer: PrettyPrinter(colors: true, printEmojis: true));
+  final LatLng CurrentLocation = LatLng(10.211603008889157, 76.19320845015968);
+  List<Cameras>? allcameras;
+  void getdata() async {
+    CollectionReference _collectionRef =
+        FirebaseFirestore.instance.collection('cameras');
+    QuerySnapshot querySnapshot = await _collectionRef.get();
+
+    // Get data from docs and convert map to List
+    final allData = querySnapshot.docs.map((doc) => doc.data());
+    allcameras = allData.map((doc) {
+      return Cameras.fromJson(doc as Map<String, dynamic>);
+    }).toList();
+  }
+
   String mapTheme = '';
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    getdata();
     mapTheme;
     DefaultAssetBundle.of(context)
         .loadString('assets/mapstyles/dark.json')
@@ -47,14 +45,24 @@ class _MyHomePageState extends State<HomePage> {
 
   late GoogleMapController mapController;
   Map<String, Marker> _markers = {};
+
   void _incrementCounter() async {
-    setState(() {
-      addmarker('test', CurrentLocation);
-    });
+    // List<LatLng> alllocations = [];
+    // logger.w(allcameras!.length);
+    for (var element in allcameras!) {
+      // alllocations.add(LatLng(element.Latitude!, element.Longitude!));
+      if (element.latitude != null) {
+        addmarker(
+            element.place!, LatLng(element.latitude!, element.longitude!));
+      }
+    }
+
+    print(allcameras!.length);
     Location usrlocation = Location();
     LocationData currentLocation = await usrlocation.getLocation();
     LatLng usercoordinate =
         LatLng(currentLocation.latitude!, currentLocation.longitude!);
+    setState(() {});
   }
 
   @override
@@ -95,6 +103,5 @@ class _MyHomePageState extends State<HomePage> {
       icon: markerIcon,
     );
     _markers[id] = marker;
-    setState(() {});
   }
 }

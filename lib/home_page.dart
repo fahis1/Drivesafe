@@ -18,6 +18,7 @@ class _MyHomePageState extends State<HomePage> {
       Logger(printer: PrettyPrinter(colors: true, printEmojis: true));
   final LatLng CurLoc = LatLng(10.211603008889157, 76.19320845015968);
   List<Cameras>? allcameras;
+  List<Map<String, num>> closestCamera = [];
   void getdata() async {
     CollectionReference _collectionRef =
         FirebaseFirestore.instance.collection('cameras');
@@ -43,33 +44,51 @@ class _MyHomePageState extends State<HomePage> {
 
     // num? distance = mp.SphericalUtil.computeDistanceBetween(
     //     usercoordinateasmp, mp.LatLng(10.211603008889157, 76.19320845015968));
-    List<Map<num, String>> closestCamera = [];
     for (var element in allcameras!) {
       // alllocations.add(LatLng(element.Latitude!, element.Longitude!));
       mp.LatLng camlocation = mp.LatLng(element.latitude!, element.longitude!);
       num? distance = mp.SphericalUtil.computeDistanceBetween(
           usercoordinateasmp, camlocation);
 
-      if (distance <= 900) {
-        closestCamera.add({distance: element.place!});
-      
+      if (distance <= 12000) {
+        closestCamera.add({element.place!: distance});
       }
       if (element.latitude != null && distance <= 20000) {
         addmarker(
             element.place!, LatLng(element.latitude!, element.longitude!));
       }
     }
-//     closestCamera;
-//     if (closestCamera.isNotEmpty) {
-// var max = closestCamera[0];
-// closestCamera.forEach((item) {
-// if (item['amount'] > max['amount']) max = item;
-// });
-// print(max['amount']);
-// print(closestCamera);
-}
 
     setState(() {});
+  }
+
+  String closecamloc = "no location data";
+  num? min;
+  void findMin(num num, String cl) {
+    if (min == null) {
+      min = num;
+    } else if (min! >= num) {
+      min = num;
+      closecamloc = cl;
+    }
+  }
+
+  void findNear() {
+    logger.wtf(closestCamera);
+    if (closestCamera.isNotEmpty) {
+      // double max=0;
+      bool check;
+      closestCamera.forEach((item) {
+        item.forEach((key, value) {
+          findMin(value, key);
+
+          // logger.w(key);
+          // logger.w(value);
+        });
+      });
+      logger.wtf(closecamloc);
+      logger.wtf(min);
+    }
   }
 
   String mapTheme = '';
@@ -110,7 +129,7 @@ class _MyHomePageState extends State<HomePage> {
         myLocationEnabled: true,
       ),
       floatingActionButton: new FloatingActionButton(
-        onPressed: placeMarkers,
+        onPressed: findNear,
         tooltip: 'Increment',
         child: new Icon(Icons.replay),
       ),

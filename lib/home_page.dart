@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
 class _MyHomePageState extends State<HomePage> {
   final logger =
       Logger(printer: PrettyPrinter(colors: true, printEmojis: true));
-  final LatLng CurLoc = LatLng(10.211603008889157, 76.19320845015968);
+
   List<Cameras>? allcameras;
   List<Map<String, num>> closestCamera = [];
   void getdata() async {
@@ -32,15 +32,25 @@ class _MyHomePageState extends State<HomePage> {
     placeMarkers();
   }
 
+  LatLng? usercoordinate;
+
   void placeMarkers() async {
     List<LatLng> alllocations = [];
     // logger.w(allcameras!.length);
+    // showDialog(
+    //   context: context,
+    //   builder: (context) {
+    //     return Center(child: CircularProgressIndicator()); //loading circle
+    //   },
+    // );
     Location usrlocation = Location(); //getting user location
     LocationData currentLocation = await usrlocation.getLocation();
-    LatLng usercoordinate =
+    usercoordinate =
         LatLng(currentLocation.latitude!, currentLocation.longitude!);
     mp.LatLng usercoordinateasmp =
         mp.LatLng(currentLocation.latitude!, currentLocation.longitude!);
+    logger.e(usercoordinate);
+    // Navigator.of(context).pop(); //loading end
 
     // num? distance = mp.SphericalUtil.computeDistanceBetween(
     //     usercoordinateasmp, mp.LatLng(10.211603008889157, 76.19320845015968));
@@ -77,7 +87,6 @@ class _MyHomePageState extends State<HomePage> {
     logger.wtf(closestCamera);
     if (closestCamera.isNotEmpty) {
       // double max=0;
-      bool check;
       closestCamera.forEach((item) {
         item.forEach((key, value) {
           findMin(value, key);
@@ -108,26 +117,42 @@ class _MyHomePageState extends State<HomePage> {
 
   late GoogleMapController mapController;
   Map<String, Marker> _markers = {};
+  //   do {
 
+  //  }
+  //  while(n>=0);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("DriveSafe"),
       ),
-      body: GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: CurLoc,
-          zoom: 7.5,
-        ),
-        onMapCreated: (controller) {
-          mapController = controller;
-          controller.setMapStyle(mapTheme);
-        },
-        markers: _markers.values.toSet(),
-        zoomControlsEnabled: false,
-        myLocationEnabled: true,
-      ),
+      body: usercoordinate == null
+          ? Center(
+              heightFactor: 100,
+              child: Column(
+                children: [
+                  CircularProgressIndicator(),
+                  Text("loading location")
+                ],
+              ),
+            )
+          : GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: usercoordinate!,
+                zoom: 12.5,
+              ),
+              onMapCreated: (controller) {
+                mapController = controller;
+                controller.setMapStyle(mapTheme);
+              },
+              markers: _markers.values.toSet(),
+              zoomControlsEnabled: false,
+              rotateGesturesEnabled: false,
+              tiltGesturesEnabled: false,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+            ),
       floatingActionButton: new FloatingActionButton(
         onPressed: findNear,
         tooltip: 'Increment',

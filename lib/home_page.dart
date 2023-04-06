@@ -5,6 +5,8 @@ import 'package:logger/logger.dart';
 import 'model/user_model.dart';
 import 'package:location/location.dart';
 import 'package:maps_toolkit/maps_toolkit.dart' as mp;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'dart:async';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -19,6 +21,8 @@ class _MyHomePageState extends State<HomePage> {
 
   List<Cameras>? allcameras;
   List<Map<String, num>> closestCamera = [];
+  late int val;
+  String? tempmin;
   void getdata() async {
     CollectionReference _collectionRef =
         FirebaseFirestore.instance.collection('cameras');
@@ -73,8 +77,8 @@ class _MyHomePageState extends State<HomePage> {
   }
 
   String closecamloc = "no location data";
-  num? min;
-  void findMin(num num, String cl) {
+  int? min;
+  void findMin(int num, String cl) {
     if (min == null) {
       min = num;
     } else if (min! >= num) {
@@ -83,21 +87,29 @@ class _MyHomePageState extends State<HomePage> {
     }
   }
 
-  void findNear() {
-    logger.wtf(closestCamera);
-    if (closestCamera.isNotEmpty) {
-      // double max=0;
-      closestCamera.forEach((item) {
-        item.forEach((key, value) {
-          findMin(value, key);
+  findNear() {
+    const tenSec = const Duration(seconds: 3);
 
-          // logger.w(key);
-          // logger.w(value);
+    Timer.periodic(tenSec, (Timer timer) {
+      // This statement will be printed after every one second
+
+      if (closestCamera.isNotEmpty) {
+        // double max=0;
+        closestCamera.forEach((item) {
+          item.forEach((key, value) {
+            val = value.toInt();
+            findMin(val, key);
+
+            // logger.w(key);
+            // logger.w(value);
+          });
         });
-      });
+      }
+      // tempmin = min.toString();
       logger.wtf(closecamloc);
-      logger.wtf(min);
-    }
+      // logger.wtf(min);
+      setState(() {});
+    });
   }
 
   String mapTheme = '';
@@ -117,10 +129,7 @@ class _MyHomePageState extends State<HomePage> {
 
   late GoogleMapController mapController;
   Map<String, Marker> _markers = {};
-  //   do {
 
-  //  }
-  //  while(n>=0);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,26 +146,50 @@ class _MyHomePageState extends State<HomePage> {
                 ],
               ),
             )
-          : GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: usercoordinate!,
-                zoom: 12.5,
-              ),
-              onMapCreated: (controller) {
-                mapController = controller;
-                controller.setMapStyle(mapTheme);
-              },
-              markers: _markers.values.toSet(),
-              zoomControlsEnabled: false,
-              rotateGesturesEnabled: false,
-              tiltGesturesEnabled: false,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
+          : Stack(
+              children: [
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: usercoordinate!,
+                    zoom: 12.5,
+                  ),
+                  onMapCreated: (controller) {
+                    mapController = controller;
+                    controller.setMapStyle(mapTheme);
+                  },
+                  markers: _markers.values.toSet(),
+                  zoomControlsEnabled: false,
+                  rotateGesturesEnabled: false,
+                  tiltGesturesEnabled: false,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    margin: EdgeInsets.all(10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.blue[200],
+                          borderRadius: BorderRadius.all(Radius.circular(29))),
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: Text('$closecamloc' + "   " + '$min'),
+                      ),
+                      height: 100,
+                      width: double.infinity,
+                    ),
+                  ),
+                )
+              ],
             ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: findNear,
-        tooltip: 'Increment',
-        child: new Icon(Icons.replay),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 110),
+        child: new FloatingActionButton(
+          onPressed: findNear,
+          tooltip: 'Increment',
+          child: new Icon(Icons.replay),
+        ),
       ),
     );
   }

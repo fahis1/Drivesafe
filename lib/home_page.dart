@@ -36,48 +36,76 @@ class _MyHomePageState extends State<HomePage> {
     placeMarkers();
   }
 
+  // late Location usrlocation;
+  // late Location location;
+  Location location = Location();
   LatLng? usercoordinate;
+  late mp.LatLng usercoordinateasmp;
+  // late LocationData currentLocation;
+  late mp.LatLng camlocation;
+  late LocationData cLocation;
+  // void getCurrentLocation() async {}
 
   void placeMarkers() async {
     List<LatLng> alllocations = [];
-    // logger.w(allcameras!.length);
-    // showDialog(
-    //   context: context,
-    //   builder: (context) {
-    //     return Center(child: CircularProgressIndicator()); //loading circle
-    //   },
-    // );
-    Location usrlocation = Location(); //getting user location
-    LocationData currentLocation = await usrlocation.getLocation();
-    usercoordinate =
-        LatLng(currentLocation.latitude!, currentLocation.longitude!);
-    mp.LatLng usercoordinateasmp =
-        mp.LatLng(currentLocation.latitude!, currentLocation.longitude!);
-    logger.e(usercoordinate);
-    // Navigator.of(context).pop(); //loading end
+    logger.wtf(allcameras!.length);
 
     // num? distance = mp.SphericalUtil.computeDistanceBetween(
     //     usercoordinateasmp, mp.LatLng(10.211603008889157, 76.19320845015968));
-    for (var element in allcameras!) {
-      // alllocations.add(LatLng(element.Latitude!, element.Longitude!));
-      mp.LatLng camlocation = mp.LatLng(element.latitude!, element.longitude!);
-      num? distance = mp.SphericalUtil.computeDistanceBetween(
-          usercoordinateasmp, camlocation);
 
-      if (distance <= 12000) {
-        closestCamera.add({element.place!: distance});
-      }
-      if (element.latitude != null && distance <= 20000) {
-        addmarker(
-            element.place!, LatLng(element.latitude!, element.longitude!));
-      }
-    }
+    //usrlocation = Location(); //getting user location
 
-    setState(() {});
+    // const tenSec = const Duration(seconds: 3);
+    // Timer.periodic(tenSec, (Timer timer) async {
+
+    // currentLocation = await usrlocation.getLocation();
+    // usercoordinate =
+    //     LatLng(currentLocation.latitude!, currentLocation.longitude!);
+    // usercoordinateasmp =
+    //     mp.LatLng(currentLocation.latitude!, currentLocation.longitude!);
+
+    // logger.e(usercoordinate);
+
+    location.getLocation().then(
+      (location) {
+        cLocation = location;
+      },
+    );
+
+    location.onLocationChanged.listen(
+      (newLoc) {
+        cLocation = newLoc;
+        // logger.e(newLoc);
+        // logger.wtf(cLocation);
+        usercoordinate = LatLng(cLocation.latitude!, cLocation.longitude!);
+        usercoordinateasmp =
+            mp.LatLng(cLocation.latitude!, cLocation.longitude!);
+
+        logger.w(usercoordinateasmp);
+        for (var element in allcameras!) {
+          // alllocations.add(LatLng(element.Latitude!, element.Longitude!));
+          camlocation = mp.LatLng(element.latitude!, element.longitude!);
+          num? distance = mp.SphericalUtil.computeDistanceBetween(
+              usercoordinateasmp, camlocation);
+
+          if (distance <= 12000) {
+            closestCamera.add({element.place!: distance});
+          }
+          if (element.latitude != null && distance <= 20000) {
+            addmarker(
+                element.place!, LatLng(element.latitude!, element.longitude!));
+          }
+        }
+        // });
+
+        setState(() {});
+      },
+    );
   }
 
   String closecamloc = "no location data";
   int? min;
+
   void findMin(int num, String cl) {
     if (min == null) {
       min = num;
@@ -88,9 +116,11 @@ class _MyHomePageState extends State<HomePage> {
   }
 
   findNear() {
-    const tenSec = const Duration(seconds: 3);
+    // const tenSec = const Duration(seconds: 3);
 
-    Timer.periodic(tenSec, (Timer timer) {
+    // Timer.periodic(tenSec, (Timer timer) {
+
+    location.onLocationChanged.listen((newLoc) {
       // This statement will be printed after every one second
 
       if (closestCamera.isNotEmpty) {
@@ -107,8 +137,10 @@ class _MyHomePageState extends State<HomePage> {
       }
       // tempmin = min.toString();
       logger.wtf(closecamloc);
-      // logger.wtf(min);
+      logger.e(usercoordinate);
+      logger.wtf(min);
       setState(() {});
+      // });
     });
   }
 
@@ -118,6 +150,9 @@ class _MyHomePageState extends State<HomePage> {
     // TODO: implement initState
     super.initState();
     getdata();
+    placeMarkers();
+    findNear();
+    // getCurrentLocation();
 
     mapTheme;
     DefaultAssetBundle.of(context)

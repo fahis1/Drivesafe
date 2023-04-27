@@ -28,6 +28,7 @@ class _MyHomePageState extends State<HomePage> {
   Cameras? temp1;
   // List<Camerasnear> closestCamera = [];
   List<Closecameras> closestCamera = [];
+  Closecameras? mostClosest;
   Location location = Location();
   LatLng? usercoordinate;
   late mp.LatLng usercoordinateasmp;
@@ -62,33 +63,31 @@ class _MyHomePageState extends State<HomePage> {
 
     usercoordinate = LatLng(cLocation.latitude!, cLocation.longitude!);
     usercoordinateasmp = mp.LatLng(cLocation.latitude!, cLocation.longitude!);
-    Timer.periodic(tenSec, (Timer timer) {
-      logger.w(usercoordinateasmp);
-      for (var element in allcameras!) {
-        camlocation = mp.LatLng(element.latitude!, element.longitude!);
-        distance = mp.SphericalUtil.computeDistanceBetween(
-                usercoordinateasmp, camlocation)
-            .toDouble();
+    // Timer.periodic(tenSec, (Timer timer) {
+    logger.w(usercoordinateasmp);
+    for (var element in allcameras!) {
+      camlocation = mp.LatLng(element.latitude!, element.longitude!);
+      distance = mp.SphericalUtil.computeDistanceBetween(
+              usercoordinateasmp, camlocation)
+          .toDouble();
 
-        if (element.latitude != null && distance! <= 20000) {
-          addmarker(
-              element.place!,
-              LatLng(element.latitude!, element.longitude!),
-              element.place.toString());
-          if (element.latitude != null && distance! <= 5000) {
-            temp1 = maincameras.firstWhereOrNull((item) => item == element);
-            // logger.wtf(temp?.camera!.place);
-            // logger.wtf(element.place);
-            if (temp == null) {
-              maincameras.add(element);
-            }
+      if (element.latitude != null && distance! <= 20000) {
+        addmarker(element.place!, LatLng(element.latitude!, element.longitude!),
+            element.place.toString());
+        if (element.latitude != null && distance! <= 5000) {
+          temp1 = maincameras.firstWhereOrNull((item) => item == element);
+          // logger.wtf(temp?.camera!.place);
+          // logger.wtf(element.place);
+          if (temp == null) {
+            maincameras.add(element);
           }
         }
       }
+    }
 
-      // logger.wtf(maincameras);
-      calculateDistance();
-    });
+    // logger.wtf(maincameras);
+    calculateDistance();
+    // });
   }
   // late Location usrlocation;
   // late Location location;
@@ -128,7 +127,7 @@ class _MyHomePageState extends State<HomePage> {
               .toDouble();
 
           if (distance! <= 2000) {
-            logger.w(closestCamera.length);
+            // logger.w(closestCamera.length);
             // logger.i(element.place);
             // if (closestCamera.isNotEmpty) {
             // logger.e(distance);
@@ -152,7 +151,6 @@ class _MyHomePageState extends State<HomePage> {
             // logger.i(nearcamera.camera!.place);
             // logger.e(temp);
             else {
-              logger.e("hehehehehe");
               // for (var sa in closestCamera) {
               //   if (sa.camera!.place.toString() == element.place.toString()) {
               //     for (var sa in closestCamera) {
@@ -178,11 +176,11 @@ class _MyHomePageState extends State<HomePage> {
           //       element.place!, LatLng(element.latitude!, element.longitude!));
           // }
         }
-        for (var sa in closestCamera) {
-          logger.i(sa.camera!.place);
-          logger.i(sa.distance);
-          logger.i(closestCamera.length);
-        }
+        // for (var sa in closestCamera) {
+        //   logger.i(sa.camera!.place);
+        //   logger.i(sa.distance);
+        //   logger.i(closestCamera.length);
+        // }
         // logger.wtf(closestCamera);
         findNear();
         // });
@@ -210,19 +208,22 @@ class _MyHomePageState extends State<HomePage> {
       // This statement will be printed after every one second
 
       if (closestCamera.isNotEmpty) {
-        // closestCamera.forEach((element) {
         double min = closestCamera.first.distance!;
-        min1 = min.toInt();
         closestCamera.forEach((element) {
-          if (element.distance! < min) min = element.distance!;
+          min1 = min.toInt();
+          // logger.e(min);
+          // logger.wtf(min1);
+          closestCamera.forEach((element) {
+            if (element.distance! < min) min = element.distance!;
+            mostClosest =
+                closestCamera.firstWhere((element) => element.distance == min);
+          });
         });
         // logger.e(min);
-        Closecameras mostClosest =
-            closestCamera.firstWhere((element) => element.distance == min);
 
         // logger.w(mostClosest.camera!.place);
 
-        closecamloc = mostClosest.camera?.place.toString();
+        closecamloc = mostClosest?.camera?.place.toString();
 
         // logger.wtf(mostClosest);
         // logger.wtf(closecamloc);

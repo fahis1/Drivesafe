@@ -25,6 +25,7 @@ class _MyHomePageState extends State<HomePage> {
 
   List<Cameras>? allcameras;
   late List<Cameras> maincameras = [];
+  Cameras? temp1;
   // List<Camerasnear> closestCamera = [];
   List<Closecameras> closestCamera = [];
   Location location = Location();
@@ -34,6 +35,7 @@ class _MyHomePageState extends State<HomePage> {
   double? distance;
   late mp.LatLng camlocation;
   late LocationData cLocation;
+  String? closecamloc = "loading data";
   // String? nextCamera;
   // Camerasnear? nextCamera;
 
@@ -74,7 +76,12 @@ class _MyHomePageState extends State<HomePage> {
               LatLng(element.latitude!, element.longitude!),
               element.place.toString());
           if (element.latitude != null && distance! <= 5000) {
-            maincameras.add(element);
+            temp1 = maincameras.firstWhereOrNull((item) => item == element);
+            // logger.wtf(temp?.camera!.place);
+            // logger.wtf(element.place);
+            if (temp == null) {
+              maincameras.add(element);
+            }
           }
         }
       }
@@ -121,7 +128,7 @@ class _MyHomePageState extends State<HomePage> {
               .toDouble();
 
           if (distance! <= 2000) {
-            // logger.w(distance);
+            logger.w(closestCamera.length);
             // logger.i(element.place);
             // if (closestCamera.isNotEmpty) {
             // logger.e(distance);
@@ -129,33 +136,40 @@ class _MyHomePageState extends State<HomePage> {
                 (item) => item.camera!.place == element.place);
             // logger.wtf(temp?.camera!.place);
             // logger.wtf(element.place);
-            if (temp?.camera!.place.toString() == element.place.toString()) {
-              // logger.e("hehehehehe");
-              for (var sa in closestCamera) {
-                sa.distance = distance;
+            if (temp != null) {
+              if (temp?.camera!.place.toString() == element.place.toString()) {
+                for (var sa in closestCamera) {
+                  // logger.wtf(element.place);
+                  // logger.e(distance);
+                  if (sa.camera!.place.toString() ==
+                      temp?.camera!.place.toString()) {
+                    sa.distance = distance;
+                  }
+                }
               }
             }
             // logger.i(nearcamera.distance);
             // logger.i(nearcamera.camera!.place);
             // logger.e(temp);
-            if (temp == null) {
-              for (var sa in closestCamera) {
-                if (sa.camera!.place.toString() == element.place.toString()) {
-                  for (var sa in closestCamera) {
-                    sa.distance = distance;
-                  }
-                }
-              }
-              nearcamera.distance = distance;
+            else {
+              logger.e("hehehehehe");
+              // for (var sa in closestCamera) {
+              //   if (sa.camera!.place.toString() == element.place.toString()) {
+              //     for (var sa in closestCamera) {
+              //       sa.distance = distance;
+              //     }
+              //   }
               nearcamera.camera = element;
-              // logger.w(distance);
-              // logger.w(nearcamera.camera!.place);
-              // closestCamera.add(nearcamera);
-
+              nearcamera.distance = distance;
               closestCamera.add(nearcamera);
-
-              // }
             }
+
+            // logger.w(distance);
+            // logger.w(nearcamera.camera!.place);
+            // closestCamera.add(nearcamera);
+
+            // }
+
             // logger.i(closestCamera.length);
           }
 
@@ -177,15 +191,13 @@ class _MyHomePageState extends State<HomePage> {
     );
   }
 
-  String? closecamloc = "no location data";
   int? min1;
 
-  // void findMin(int num, String cl) {
-  //   if (min == null) {
-  //     min = num;
-  //   } else if (min! >= num) {
-  //     min = num;
-  //     closecamloc = cl;
+  // int? findMin(int num) {
+  //   if (min1 == null) {
+  //     min1 = num;
+  //   } else if (min1! >= num) {
+  //     min1 = num;
   //   }
   // }
 

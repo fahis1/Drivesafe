@@ -48,6 +48,34 @@ class Closecameras {
   //       // "profilepic": profilepic,
   //     };
 }
+
+class ChatUser {
+  String? first_name;
+  String? last_name;
+  String? user_id;
+  String? email;
+
+  ChatUser({
+    this.email,
+    this.user_id,
+    this.first_name,
+    this.last_name,
+  });
+  factory ChatUser.fromJson(Map<String, dynamic> parsedJson) {
+    return ChatUser(
+      user_id: parsedJson['user_id'].toString(),
+      first_name: parsedJson['first_name'].toString(),
+      last_name: parsedJson['last_name'].toString(),
+      email: parsedJson['email'].toString(),
+    );
+  }
+  Map<String, dynamic> toJson() => {
+        "user_id": user_id,
+        "first_name": first_name,
+        "last_name": last_name,
+        "email": email,
+      };
+}
 // class Camerasnear {
 //   String? place;
 //   num? distance;

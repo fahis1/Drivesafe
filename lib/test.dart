@@ -18,7 +18,6 @@ import 'package:provider/provider.dart';
 // import 'package:geolocator/geolocator.dart' as gl;
 
 class HomePage extends StatefulWidget {
-  static const String routeName = 'home_page';
   const HomePage({Key? key}) : super(key: key);
 
   @override
@@ -81,7 +80,7 @@ class _MyHomePageState extends State<HomePage> {
       if (element.latitude != null && distance! <= 20000) {
         addmarker(element.place!, LatLng(element.latitude!, element.longitude!),
             element.place.toString());
-        if (element.latitude != null && distance! <= 10000) {
+        if (element.latitude != null && distance! <= 5000) {
           temp1 = maincameras.firstWhereOrNull((item) => item == element);
           // logger.wtf(temp?.camera!.place);
           // logger.wtf(element.place);
@@ -133,7 +132,7 @@ class _MyHomePageState extends State<HomePage> {
                   usercoordinateasmp, camlocation)
               .toDouble();
 
-          if (distance! <= 10000) {
+          if (distance! <= 2000) {
             // logger.w(closestCamera.length);
             // logger.i(element.place);
             // if (closestCamera.isNotEmpty) {
@@ -225,7 +224,7 @@ class _MyHomePageState extends State<HomePage> {
       //   speedinMps = speedinMps * 3.6;
       //   speedMps = speedinMps.toStringAsPrecision(2);
       // });
-      // logger.w(speedMps);
+      logger.w(speedMps);
       // This statement will be printed after every one second
 
       if (closestCamera.isNotEmpty) {
@@ -297,103 +296,66 @@ class _MyHomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-        stream: context.watch<AuthProvider>().stream(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return const LoginForm();
-          return Scaffold(
-            appBar: AppBar(
-              actions: [
-                IconButton(
-                  tooltip: 'Logout',
-                  onPressed: () => context.read<AuthProvider>().signOut(),
-                  icon: const Icon(Icons.logout),
-                  splashRadius: 20,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("DriveSafe"),
+      ),
+      body: usercoordinate == null
+          ? Center(
+              heightFactor: 100,
+              child: Column(
+                children: [
+                  CircularProgressIndicator(),
+                  Text("loading location")
+                ],
+              ),
+            )
+          : Stack(
+              children: [
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: usercoordinate!,
+                    zoom: 12.5,
+                  ),
+                  onMapCreated: (controller) {
+                    mapController = controller;
+                    controller.setMapStyle(mapTheme);
+                  },
+                  markers: _markers.values.toSet(),
+                  zoomControlsEnabled: false,
+                  rotateGesturesEnabled: false,
+                  tiltGesturesEnabled: false,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    margin: EdgeInsets.all(10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.blue[200],
+                          borderRadius: BorderRadius.all(Radius.circular(29))),
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: Text('$closecamloc' + "   " + '$min1' + " km"),
+                      ),
+                      height: 100,
+                      width: double.infinity,
+                    ),
+                  ),
                 )
               ],
-              title: const Text("DriveSafe"),
             ),
-            body: usercoordinate == null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const CircularProgressIndicator(),
-                        Container(
-                          margin: const EdgeInsets.all(20),
-                          child: Center(
-                            child: AnimatedTextKit(
-                              animatedTexts: [
-                                WavyAnimatedText("Please wait...",
-                                    speed: const Duration(milliseconds: 500))
-                              ],
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  )
-                : Stack(
-                    children: [
-                      GoogleMap(
-                        initialCameraPosition: CameraPosition(
-                          target: usercoordinate!,
-                          zoom: 12.5,
-                        ),
-                        onMapCreated: (controller) {
-                          mapController = controller;
-                          controller.setMapStyle(mapTheme);
-                        },
-                        markers: _markers.values.toSet(),
-                        zoomControlsEnabled: false,
-                        rotateGesturesEnabled: false,
-                        tiltGesturesEnabled: false,
-                        myLocationEnabled: true,
-                        myLocationButtonEnabled: true,
-                      ),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Container(
-                          margin: const EdgeInsets.all(13),
-                          child: Container(
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    width: 4,
-                                    color:
-                                        const Color.fromARGB(255, 245, 34, 34)),
-                                color: const Color.fromARGB(255, 253, 130, 128),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(25))),
-                            child: Container(
-                              margin: const EdgeInsets.all(20),
-                              child: Center(
-                                child: Text(
-                                  "Place: " '$closecamloc' +
-                                      "\n" +
-                                      "Distance: " '$min1 km',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black),
-                                ),
-                              ),
-                            ),
-                            height: 90,
-                            width: double.infinity,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-            floatingActionButton: Padding(
-              padding: const EdgeInsets.only(bottom: 90),
-              child: FloatingActionButton(
-                onPressed: locRadius,
-                tooltip: 'Refresh',
-                child: const Icon(Icons.replay),
-              ),
-            ),
-          );
-        });
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 110),
+        child: new FloatingActionButton(
+          onPressed: loger,
+          tooltip: 'Increment',
+          child: new Icon(Icons.replay),
+        ),
+      ),
+    );
   }
 
   addmarker(String id, LatLng location, String locname) async {

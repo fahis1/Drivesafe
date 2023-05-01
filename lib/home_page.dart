@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -5,6 +6,7 @@ import 'package:drivesafe/screens/auth_provider.dart';
 import 'package:drivesafe/screens/login_form.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
@@ -13,6 +15,7 @@ import 'package:location/location.dart';
 import 'package:maps_toolkit/maps_toolkit.dart' as mp;
 import 'dart:async';
 import 'dart:convert';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:collection/collection.dart';
 import 'package:provider/provider.dart';
 // import 'package:geolocator/geolocator.dart' as gl;
@@ -26,8 +29,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<HomePage> {
-  final logger =
-      Logger(printer: PrettyPrinter(colors: true, printEmojis: true));
+  // final logger =
+  // Logger(printer: PrettyPrinter(colors: true, printEmojis: true));
 
   List<Cameras>? allcameras;
   late List<Cameras> maincameras = [];
@@ -44,8 +47,26 @@ class _MyHomePageState extends State<HomePage> {
   late LocationData cLocation;
   String? closecamloc = "loading data";
   String speedMps = '0';
+  int count = 0;
+  bool isopen = false;
+  bool isclosed = false;
+  bool iskilled = false;
+
+  final player = AudioCache();
+  static AudioPlayer? instance;
   // String? nextCamera;
   // Camerasnear? nextCamera;
+  void initaudio() async {
+    instance = await player.loop("sounds/beep.mp3");
+    // player.loop('sounds/beep.mp3');
+    // instance = await player.loop("bgmusic.mp3");
+  }
+
+  void stopaudio() async {
+    if (instance != null) {
+      instance!.pause();
+    }
+  }
 
   late int val;
   String? tempmin;
@@ -71,7 +92,7 @@ class _MyHomePageState extends State<HomePage> {
     usercoordinate = LatLng(cLocation.latitude!, cLocation.longitude!);
     usercoordinateasmp = mp.LatLng(cLocation.latitude!, cLocation.longitude!);
     // Timer.periodic(tenSec, (Timer timer) {
-    logger.w(usercoordinateasmp);
+    // logger.w(usercoordinateasmp);
     for (var element in allcameras!) {
       camlocation = mp.LatLng(element.latitude!, element.longitude!);
       distance = mp.SphericalUtil.computeDistanceBetween(
@@ -102,7 +123,7 @@ class _MyHomePageState extends State<HomePage> {
   // void getCurrentLocation() async {}
   Closecameras? temp;
   void calculateDistance() async {
-    logger.wtf(maincameras.length);
+    // logger.wtf(maincameras.length);
     // logger.wtf(maincameras!.length);
 
     location.getLocation().then(
@@ -198,6 +219,7 @@ class _MyHomePageState extends State<HomePage> {
 
   String? min1;
   int? min2;
+  int? min3;
 
   // int? findMin(int num) {
   //   if (min1 == null) {
@@ -232,6 +254,7 @@ class _MyHomePageState extends State<HomePage> {
         double min = closestCamera.first.distance!;
         closestCamera.forEach((element) {
           min2 = min.toInt();
+          min3 = min.toInt();
           // logger.e(min);
           // logger.wtf(min1);
           closestCamera.forEach((element) {
@@ -241,6 +264,7 @@ class _MyHomePageState extends State<HomePage> {
                 closestCamera.firstWhere((element) => element.distance == min);
           });
         });
+
         min = min / 1000;
         min1 = min.toStringAsPrecision(2);
         // logger.e(min);
@@ -261,16 +285,49 @@ class _MyHomePageState extends State<HomePage> {
 
       // logger.e(usercoordinate);
       // logger.wtf(min);
+      if (min3! <= 600 && count == 0) {
+        isclosed = false;
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.info,
+          // showCloseIcon: true,
+          title: "Alert",
+          desc: "Camera detected within 600 meters",
+          btnCancelText: "Ok",
+          btnCancelOnPress: () {
+            if (instance != null) {
+              instance!.pause();
+            }
+            iskilled = true;
+            isopen = false;
+          },
+          // autoDismiss: true,
+
+          // autoHide: const Duration(seconds: 3),
+          onDismissCallback: (type) {
+            isclosed = true;
+          },
+        ).show();
+        initaudio();
+        count = 1;
+      }
+      if (min3! >= 600 && count == 1) {
+        if (isclosed != true) {
+          AwesomeDialog(context: context).dismiss();
+        }
+        count = 0;
+        stopaudio();
+      }
       setState(() {});
     });
   }
 
   loger() {
-    for (var element in closestCamera) {
-      logger.d(element.camera!.place);
-      logger.d(element.distance);
-      logger.d(closestCamera.length);
-    }
+    // for (var element in closestCamera) {
+    //   logger.d(element.camera!.place);
+    //   logger.d(element.distance);
+    //   logger.d(closestCamera.length);
+    // }
   }
 
   String mapTheme = '';
@@ -278,6 +335,7 @@ class _MyHomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    // initaudio();
     getdata();
     calculateDistance();
     // placeMarkers();
@@ -292,6 +350,7 @@ class _MyHomePageState extends State<HomePage> {
     });
   }
 
+//  => context.read<AuthProvider>().signOut()
   late GoogleMapController mapController;
   Map<String, Marker> _markers = {};
 
@@ -306,7 +365,20 @@ class _MyHomePageState extends State<HomePage> {
               actions: [
                 IconButton(
                   tooltip: 'Logout',
-                  onPressed: () => context.read<AuthProvider>().signOut(),
+                  onPressed: () {
+                    AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.warning,
+                      animType: AnimType.scale,
+                      showCloseIcon: true,
+                      title: "Logout",
+                      desc: "Are you sure ?",
+                      btnOkText: "yes",
+                      btnCancelOnPress: () {},
+                      btnOkOnPress: () =>
+                          context.read<AuthProvider>().signOut(),
+                    ).show();
+                  },
                   icon: const Icon(Icons.logout),
                   splashRadius: 20,
                 )
@@ -350,6 +422,10 @@ class _MyHomePageState extends State<HomePage> {
                         tiltGesturesEnabled: false,
                         myLocationEnabled: true,
                         myLocationButtonEnabled: true,
+                        onLongPress: (LatLng latLng) {
+                          final lat = latLng.latitude;
+                          final long = latLng.longitude;
+                        },
                       ),
                       Align(
                         alignment: Alignment.bottomCenter,

@@ -51,8 +51,10 @@ dependencies:
   animated_text_kit: ^4.2.2
   fluttertoast: ^8.1.2
   email_validator: ^2.1.17
-  audioplayers: ^0.19.1
   flutter_launcher_icons: ^0.13.1
+  awesome_dialog: ^3.0.2
+  audioplayers: ^0.20.1
+  # once: ^1.5.1
   # geolocator: ^9.0.2
 
 dev_dependencies:
@@ -65,7 +67,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
-  flutter_launcher_icons: "^0.13.1"
+  # flutter_launcher_icons: "^0.13.1"
 
 
 flutter_launcher_icons:
@@ -89,6 +91,7 @@ flutter:
     - assets/
     - assets/mapstyles/dark.json
     - assets/svg/
+    - assets/sounds/beep.mp3
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

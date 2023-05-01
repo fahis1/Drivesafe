@@ -9,6 +9,7 @@ class Cameras {
   double? speedlimit;
 
   Cameras({
+    this.camera_type,
     this.latitude,
     this.longitude,
     this.place,
@@ -22,10 +23,10 @@ class Cameras {
     );
   }
   Map<String, dynamic> toJson() => {
-        "place": place,
+        "location": place,
         "longitude": longitude,
         "latitude": latitude,
-        // "profilepic": profilepic,
+        "cameraType": camera_type,
       };
 }
 

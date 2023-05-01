@@ -1,18 +1,21 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:drivesafe/screens/auth_provider.dart';
 import 'package:drivesafe/screens/login_form.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:logger/logger.dart';
+import 'package:logger/logger.dart' as log;
 import 'model/user_model.dart';
 import 'package:location/location.dart';
 import 'package:maps_toolkit/maps_toolkit.dart' as mp;
+import 'package:uuid/uuid.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
@@ -29,8 +32,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<HomePage> {
-  // final logger =
-  // Logger(printer: PrettyPrinter(colors: true, printEmojis: true));
+  final logger =
+      log.Logger(printer: log.PrettyPrinter(colors: true, printEmojis: true));
 
   List<Cameras>? allcameras;
   late List<Cameras> maincameras = [];
@@ -51,9 +54,11 @@ class _MyHomePageState extends State<HomePage> {
   bool isopen = false;
   bool isclosed = false;
   bool iskilled = false;
-
+  var uuid = Uuid();
   final player = AudioCache();
   static AudioPlayer? instance;
+  final TextEditingController _place = TextEditingController(),
+      _type = TextEditingController();
   // String? nextCamera;
   // Camerasnear? nextCamera;
   void initaudio() async {
@@ -71,6 +76,7 @@ class _MyHomePageState extends State<HomePage> {
   late int val;
   String? tempmin;
   void getdata() async {
+    logger.i('getdata started');
     CollectionReference _collectionRef =
         FirebaseFirestore.instance.collection('cameras');
     QuerySnapshot querySnapshot = await _collectionRef.get();
@@ -80,11 +86,14 @@ class _MyHomePageState extends State<HomePage> {
     allcameras = allData.map((doc) {
       return Cameras.fromJson(doc as Map<String, dynamic>);
     }).toList();
+    logger.i('getdata terminated');
 
     locRadius();
   }
 
   void locRadius() async {
+    logger.i('locradius started');
+
     const tenSec = const Duration(seconds: 60);
 
     cLocation = await location.getLocation();
@@ -112,6 +121,7 @@ class _MyHomePageState extends State<HomePage> {
         }
       }
     }
+    logger.i('locradius terminated');
 
     // logger.wtf(maincameras);
     calculateDistance();
@@ -228,6 +238,92 @@ class _MyHomePageState extends State<HomePage> {
   //     min1 = num;
   //   }
   // }
+  void addtomap(double lat, double long) async {
+    double ulat = lat;
+    double ulong = long;
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.noHeader,
+      // width: 60,
+      padding: EdgeInsets.all(18),
+      body: Column(
+        children: [
+          const Text(
+            "Add new camera here",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+            ),
+          ),
+          const SizedBox(
+            height: 18,
+          ),
+          TextField(
+            controller: _place,
+            decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                label: Text("Camera Location name")),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          TextField(
+            controller: _type,
+            decoration: const InputDecoration(
+                border: OutlineInputBorder(), label: Text("Camera type")),
+          ),
+        ],
+      ),
+      // showCloseIcon: true,
+
+      btnOkText: "Add Camera",
+      btnOkColor: Colors.blue.shade300,
+      btnOkIcon: Icons.add_circle_outline,
+      btnOkOnPress: () {
+        faddcams(_place.text, _type.text, ulat, ulong);
+      },
+      // autoDismiss: true,
+
+      // autoHide: const Duration(seconds: 3),
+      onDismissCallback: (type) {
+        isclosed = true;
+      },
+    ).show();
+  }
+
+  faddcams(String pl, String ct, double lat, double long) async {
+    String cplace = pl;
+    String ctype = ct;
+    double ulat = lat;
+    double ulong = long;
+    Cameras newCam = Cameras(
+      camera_type: ctype,
+      longitude: ulong,
+      latitude: ulat,
+      place: cplace,
+    );
+    String uid = uuid.v1();
+    logger.i(uid);
+    try {
+      await FirebaseFirestore.instance
+          .collection("cameras")
+          .doc(uid)
+          .set(newCam.toJson())
+          .then((value) {
+        Fluttertoast.showToast(
+          msg: "camera added Succesfully",
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+        );
+      });
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: e.toString(),
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+      );
+    }
+  }
 
   findNear() {
     // const tenSec = const Duration(seconds: 3);
@@ -323,6 +419,7 @@ class _MyHomePageState extends State<HomePage> {
   }
 
   loger() {
+    getdata();
     // for (var element in closestCamera) {
     //   logger.d(element.camera!.place);
     //   logger.d(element.distance);
@@ -423,8 +520,9 @@ class _MyHomePageState extends State<HomePage> {
                         myLocationEnabled: true,
                         myLocationButtonEnabled: true,
                         onLongPress: (LatLng latLng) {
-                          final lat = latLng.latitude;
-                          final long = latLng.longitude;
+                          double ulat = latLng.latitude;
+                          double ulong = latLng.longitude;
+                          addtomap(ulat, ulong);
                         },
                       ),
                       Align(

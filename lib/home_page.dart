@@ -101,7 +101,7 @@ class _MyHomePageState extends State<HomePage> {
     usercoordinate = LatLng(cLocation.latitude!, cLocation.longitude!);
     usercoordinateasmp = mp.LatLng(cLocation.latitude!, cLocation.longitude!);
     // Timer.periodic(tenSec, (Timer timer) {
-    // logger.w(usercoordinateasmp);
+    logger.w(usercoordinate);
     for (var element in allcameras!) {
       camlocation = mp.LatLng(element.latitude!, element.longitude!);
       distance = mp.SphericalUtil.computeDistanceBetween(
@@ -124,8 +124,9 @@ class _MyHomePageState extends State<HomePage> {
     logger.i('locradius terminated');
 
     // logger.wtf(maincameras);
-    calculateDistance();
+    // calculateDistance();
     // });
+    setState(() {});
   }
   // late Location usrlocation;
   // late Location location;
@@ -150,8 +151,12 @@ class _MyHomePageState extends State<HomePage> {
         // logger.e(newLoc);
         // logger.wtf(cLocation);
         usercoordinate = LatLng(cLocation.latitude!, cLocation.longitude!);
-        CameraUpdate.newCameraPosition(
-            CameraPosition(target: usercoordinate!, zoom: 12.5));
+        // CameraUpdate.newCameraPosition(
+        //     CameraPosition(target: usercoordinate!, zoom: 12.5));
+
+        mapController
+            .animateCamera(CameraUpdate.newLatLngZoom(usercoordinate!, 12.5));
+
         usercoordinateasmp =
             mp.LatLng(cLocation.latitude!, cLocation.longitude!);
 
@@ -434,9 +439,9 @@ class _MyHomePageState extends State<HomePage> {
     super.initState();
     // initaudio();
     getdata();
-    calculateDistance();
+    // calculateDistance();
     // placeMarkers();
-    findNear();
+    // findNear();
     // getCurrentLocation();
 
     mapTheme;
@@ -512,13 +517,15 @@ class _MyHomePageState extends State<HomePage> {
                         onMapCreated: (controller) {
                           mapController = controller;
                           controller.setMapStyle(mapTheme);
+                          calculateDistance();
                         },
+
                         markers: _markers.values.toSet(),
                         zoomControlsEnabled: false,
                         rotateGesturesEnabled: false,
                         tiltGesturesEnabled: false,
                         myLocationEnabled: true,
-                        myLocationButtonEnabled: true,
+                        // myLocationButtonEnabled: true,
                         onLongPress: (LatLng latLng) {
                           double ulat = latLng.latitude;
                           double ulong = latLng.longitude;

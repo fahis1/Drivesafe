@@ -56,13 +56,15 @@ class _MyHomePageState extends State<HomePage> {
   bool iskilled = false;
   var uuid = Uuid();
   final player = AudioCache();
+
   static AudioPlayer? instance;
   final TextEditingController _place = TextEditingController(),
       _type = TextEditingController();
   // String? nextCamera;
   // Camerasnear? nextCamera;
   void initaudio() async {
-    instance = await player.loop("sounds/beep.mp3");
+    // logger.e(audiofile);
+    instance = await player.loop('sounds/beep.mp3');
     // player.loop('sounds/beep.mp3');
     // instance = await player.loop("bgmusic.mp3");
   }
@@ -433,6 +435,7 @@ class _MyHomePageState extends State<HomePage> {
   }
 
   String mapTheme = '';
+  // String audiofile = '';
   @override
   void initState() {
     // TODO: implement initState
@@ -443,7 +446,12 @@ class _MyHomePageState extends State<HomePage> {
     // placeMarkers();
     // findNear();
     // getCurrentLocation();
-
+    // audiofile;
+    // DefaultAssetBundle.of(context)
+    //     .loadString('assets/sounds/beep.mp3')
+    //     .then((value) {
+    //   audiofile = value;
+    // });
     mapTheme;
     DefaultAssetBundle.of(context)
         .loadString('assets/mapstyles/dark.json')
@@ -533,46 +541,97 @@ class _MyHomePageState extends State<HomePage> {
                         },
                       ),
                       Align(
-                        alignment: Alignment.bottomCenter,
+                        alignment: Alignment.bottomLeft,
                         child: Container(
-                          margin: const EdgeInsets.all(13),
+                          margin: const EdgeInsets.all(9),
                           child: Container(
                             decoration: BoxDecoration(
                                 border: Border.all(
                                     width: 4,
-                                    color:
-                                        const Color.fromARGB(255, 245, 34, 34)),
-                                color: const Color.fromARGB(255, 253, 130, 128),
+                                    color: Color.fromARGB(255, 254, 255, 214)),
+                                color: Color.fromARGB(255, 179, 232, 255),
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(25))),
+                            height: 100,
+                            width: 220,
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                children: [
+                                  const Text("Nearest Camera"),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                    '$closecamloc',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 17,
+                                        color: Colors.black),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: Container(
+                          margin: const EdgeInsets.all(9),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    width: 4,
+                                    color: const Color.fromARGB(
+                                        255, 254, 255, 214)),
+                                color: Color.fromARGB(255, 45, 173, 227),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(25))),
+                            height: 100,
+                            width: 150,
                             child: Container(
-                              margin: const EdgeInsets.all(20),
+                              margin: const EdgeInsets.all(10),
                               child: Center(
-                                child: Text(
-                                  "Place: " '$closecamloc' +
-                                      "\n" +
-                                      "Distance: " '$min1 km',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    '$min1 km',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 28,
+                                        color: Colors.white),
+                                  ),
                                 ),
                               ),
                             ),
-                            height: 90,
-                            width: double.infinity,
                           ),
                         ),
-                      )
+                      ),
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 120),
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: FloatingActionButton(
+                              onPressed: locRadius,
+                              tooltip: 'Refresh',
+                              child: const Icon(Icons.replay),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-            floatingActionButton: Padding(
-              padding: const EdgeInsets.only(bottom: 90),
-              child: FloatingActionButton(
-                onPressed: locRadius,
-                tooltip: 'Refresh',
-                child: const Icon(Icons.replay),
-              ),
-            ),
+            // floatingActionButton: Padding(
+            //   padding: const EdgeInsets.only(bottom: 108),
+            //   child: FloatingActionButton(
+            //     onPressed: locRadius,
+            //     tooltip: 'Refresh',
+            //     child: const Icon(Icons.replay),
+            //   ),
+            // ),
           );
         });
   }

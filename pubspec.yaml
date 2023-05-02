@@ -93,6 +93,7 @@ flutter:
     - assets/mapstyles/dark.json
     - assets/svg/
     - assets/sounds/beep.mp3
+    - assets/sounds/laser.mp3
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

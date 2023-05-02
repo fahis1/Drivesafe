@@ -553,22 +553,37 @@ class _MyHomePageState extends State<HomePage> {
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(25))),
                             height: 100,
-                            width: 220,
+                            width: double.infinity,
                             child: Padding(
                               padding: const EdgeInsets.all(10),
                               child: Column(
                                 children: [
-                                  const Text("Nearest Camera"),
+                                  Align(
+                                    alignment: Alignment.topLeft,
+                                    child: const Text("Nearest Camera"),
+                                  ),
                                   const SizedBox(
                                     height: 10,
                                   ),
-                                  Text(
-                                    '$closecamloc',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 17,
-                                        color: Colors.black),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Container(
+                                      width: 200,
+                                      child: Text(
+                                        '$closecamloc',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 17,
+                                            color: Colors.black),
+                                      ),
+                                    ),
                                   ),
+
+                                  // Container(
+                                  //   width: 150,
+
+                                  //   child:,
+                                  // ),
                                 ],
                               ),
                             ),
